@@ -14,8 +14,8 @@ import java.util.Set;
 @Setter
 @Getter
 @Entity
-@Table(name = "tasks")
-@JsonIgnoreProperties({"project"})
+@Table(name = "Task")
+@JsonIgnoreProperties({"Project"})
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
