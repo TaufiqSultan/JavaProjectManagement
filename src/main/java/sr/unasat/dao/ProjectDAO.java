@@ -39,7 +39,7 @@ public class ProjectDAO {
 
     public int updateProject(Project project) {
         transaction.begin();
-        String jpql = "update Project p set p.name = :name, p.description = :description where p.id = :id";
+        String jpql = "update Project p set p.projectName = :name, p.projectDescription = :description where p.projectID = :id";
         TypedQuery<Project> query = entityManager.createQuery(jpql, Project.class);
         query.setParameter("name", project.getProjectName());
         query.setParameter("description", project.getProjectDescription());
