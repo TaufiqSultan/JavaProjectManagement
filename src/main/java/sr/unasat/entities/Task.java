@@ -1,10 +1,14 @@
 package sr.unasat.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -17,6 +21,7 @@ import java.util.Set;
 @Table(name = "Task")
 @JsonIgnoreProperties({"Project"})
 public class Task {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "taskID")
@@ -30,11 +35,11 @@ public class Task {
 
     @Column(name = "startDate")
     @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
-    private LocalDate startDate;
+    private Date startDate;
 
     @Column(name = "dueDate")
     @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
-    private LocalDate dueDate;
+    private Date dueDate;
 
     @Column(name = "taskStatus")
     private String taskStatus;
@@ -45,7 +50,8 @@ public class Task {
             inverseJoinColumns = @JoinColumn(name = "user_id"))
     private Set<User> assignedUsers;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonBackReference()
+    @ManyToOne
     @JoinColumn(name = "projectID")
     private Project project;
 
@@ -73,19 +79,19 @@ public class Task {
         this.taskDescription = taskDescription;
     }
 
-    public LocalDate getStartDate() {
+    public Date getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(LocalDate startDate) {
+    public void setStartDate(Date startDate) {
         this.startDate = startDate;
     }
 
-    public LocalDate getDueDate() {
+    public Date getDueDate() {
         return dueDate;
     }
 
-    public void setDueDate(LocalDate dueDate) {
+    public void setDueDate(Date dueDate) {
         this.dueDate = dueDate;
     }
 

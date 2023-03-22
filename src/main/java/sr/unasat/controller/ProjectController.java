@@ -49,6 +49,7 @@ public class ProjectController {
 
     @DELETE
     @Path("/delete/{id}")
+
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteProject(@PathParam("id") int id) {
         int rowsDeleted = projectDAO.deleteProject(id);

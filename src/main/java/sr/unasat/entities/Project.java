@@ -1,5 +1,6 @@
 package sr.unasat.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,7 +25,8 @@ public class Project {
     @Column(name = "projectDescription", nullable = false)
     private String projectDescription;
 
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "project", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @JsonManagedReference()
     private List<Task> tasks;
 
     public Project(String projectName, String projectDescription) {

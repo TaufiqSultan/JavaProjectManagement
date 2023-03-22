@@ -2,6 +2,7 @@ package sr.unasat.dao;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import sr.unasat.configuration.JPAConfig;
 import sr.unasat.entities.Project;
@@ -13,11 +14,14 @@ public class ProjectDAO {
     private EntityTransaction transaction = entityManager.getTransaction();
 
     public List<Project> findAllProjects() {
-        transaction.begin();
+        if (!transaction.isActive()){
+            transaction.begin();
+        }
         String jpql = "select p from Project p";
         TypedQuery<Project> query = entityManager.createQuery(jpql, Project.class);
         List<Project> projectList = query.getResultList();
         transaction.commit();
+
         return projectList;
     }
 
@@ -50,12 +54,19 @@ public class ProjectDAO {
     }
 
     public int deleteProject(int id) {
-        transaction.begin();
+        if (!transaction.isActive()){
+            transaction.begin();
+        }
+        String taksjpql = "delete from Task t where t.project = :id";
+        Query TaskQuery = entityManager.createQuery(taksjpql);
         String jpql = "delete from Project p where p.id = :id";
-        TypedQuery<Project> query = entityManager.createQuery(jpql, Project.class);
+        Query query = entityManager.createQuery(jpql);
         query.setParameter("id", id);
         int rowsDeleted = query.executeUpdate();
+
+        System.out.println("row deleted"+rowsDeleted);
         transaction.commit();
         return rowsDeleted;
+
     }
 }

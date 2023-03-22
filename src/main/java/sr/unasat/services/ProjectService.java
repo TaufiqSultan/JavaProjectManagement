@@ -24,7 +24,7 @@ public class ProjectService {
         projectDAO.insertProject(project);
     }
 
-    public void updateProject(Project updatedProject) {
+    public Project updateProject(Project updatedProject) {
         Project existingProject = projectDAO.findProjectById(updatedProject.getProjectID());
         if (existingProject == null) {
             throw new EntityNotFoundException("Project with ID " + updatedProject.getProjectID() + " not found");
@@ -36,6 +36,7 @@ public class ProjectService {
         entityManager.getTransaction().begin();
         entityManager.merge(existingProject);
         entityManager.getTransaction().commit();
+        return existingProject;
     }
 
     public void deleteProject(int projectId) {

@@ -2,6 +2,7 @@ package sr.unasat.dao;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import sr.unasat.configuration.JPAConfig;
 import sr.unasat.entities.Task;
@@ -58,7 +59,7 @@ public class TaskDAO {
     public int deleteTask(int id) {
         transaction.begin();
         String jpql = "delete from Task t where t.id = :id";
-        TypedQuery<Task> query = entityManager.createQuery(jpql, Task.class);
+        Query query = entityManager.createQuery(jpql);
         query.setParameter("id", id);
         int rowsDeleted = query.executeUpdate();
         transaction.commit();
