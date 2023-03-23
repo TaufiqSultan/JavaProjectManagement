@@ -33,6 +33,7 @@ public class TaskController {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response createTask(Task task) {
+
         Task createdTask = taskDAO.insertTask(task);
         return Response.ok(createdTask).build();
     }

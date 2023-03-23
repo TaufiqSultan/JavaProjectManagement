@@ -35,16 +35,19 @@ public class ProjectController {
     }
 
     @PUT
-    @Path("/update")
+    @Path("/update/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateProject(Project updatedProject) {
-        int rowsUpdated = projectDAO.updateProject(updatedProject);
-        if (rowsUpdated == 0) {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        } else {
-            return Response.ok(updatedProject).build();
-        }
+    public Response updateProject(@PathParam("id") int id, Project updatedProject) {
+        System.out.println(updatedProject);
+        int rowsUpdated = projectDAO.updateProject(id, updatedProject.getProjectName(), updatedProject.getProjectDescription());
+        return Response.ok().build();
+
+//        if (rowsUpdated == 0) {
+//            return Response.status(Response.Status.NOT_FOUND).build();
+//        } else {
+//            return Response.ok(updatedProject).build();
+//        }
     }
 
     @DELETE

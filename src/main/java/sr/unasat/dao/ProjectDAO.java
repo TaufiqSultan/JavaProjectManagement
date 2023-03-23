@@ -41,14 +41,15 @@ public class ProjectDAO {
         return project;
     }
 
-    public int updateProject(Project project) {
+    public int updateProject(int id, String name, String desc) {
         transaction.begin();
         String jpql = "update Project p set p.projectName = :name, p.projectDescription = :description where p.projectID = :id";
-        TypedQuery<Project> query = entityManager.createQuery(jpql, Project.class);
-        query.setParameter("name", project.getProjectName());
-        query.setParameter("description", project.getProjectDescription());
-        query.setParameter("id", project.getProjectID());
+       Query query = entityManager.createQuery(jpql);
+        query.setParameter("name",name);
+        query.setParameter("description", desc);
+        query.setParameter("id",id);
         int rowsUpdated = query.executeUpdate();
+        System.out.println("updared"+ rowsUpdated);
         transaction.commit();
         return rowsUpdated;
     }

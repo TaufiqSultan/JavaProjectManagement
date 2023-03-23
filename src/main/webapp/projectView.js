@@ -1,124 +1,157 @@
-// app.js
-$(document).ready(function() {
-    // GET /projects/list
-    $.ajax({
-        url: '/projects/list',
-        type: 'GET',
-        dataType: 'json',
-        success: function(response) {
-            let projects = response.map(project => {
-                return `<li>${project.name} - ${project.description}</li>`;
-            }).join('');
-            $('#projects').html(`<ul>${projects}</ul>`);
-        },
-        error: function(error) {
-            console.log(error);
+
+const API_URL = "http://localhost:8081/javaprojectmanagement_war/api";
+const baseUrl = "http://localhost:5500"
+
+
+const urlSearchParams = new URLSearchParams(window.location.search);
+const params = Object.fromEntries(urlSearchParams.entries());
+const currentProjectId = params.p
+
+
+
+
+
+
+const getProject = async () => {
+  const res = await fetch(`${API_URL}/projects/${currentProjectId}`)
+  const project = await res.json()
+  console.log(project);
+  renderProject(project);
+}
+
+
+const deleteProject = async () => {
+  const res = await fetch(`${API_URL}/projects/delete/${currentProjectId}`, {
+    method: "DELETE"
+  });
+  window.location.replace(`${baseUrl}/projects.html`);
+
+  console.log(res);
+}
+
+const updateProject = async (name, desc) => {
+  const res = await fetch(`${API_URL}/projects/update/${currentProjectId}`, {
+    method: "PUT",
+    body: JSON.stringify({
+      "projectName": name,
+      "projectDescription":desc
+    }),
+  headers: new Headers({'content-type': 'application/json'}),
+
+
+  });
+  document.getElementById("projectName").innerText = name
+  document.getElementById("projectDescription").innerText = desc
+}
+
+const deleteTask = async (id) => {
+  if(!confirm("Are you sure")) return;
+  const res = await fetch(`${API_URL}/tasks/${id}`, {
+    method: "DELETE"
+  });
+  console.log(res);
+  if(res.ok){
+    const projectTaskListElement = document.getElementById("projectTaskList")
+    const elList = document.querySelectorAll(`[data-id]`);
+       elList.forEach(el => {
+        if(el.dataset.id == id){
+          projectTaskListElement.remove(el)
         }
     });
+  }
+}
 
-        // Retrieve the HTML table body element
-        const projectTableBody = document.querySelector('#projectTableBody');
+const createTask = async (name, desc, start, due) => {
+  const res = await fetch(`${API_URL}/tasks/add`, {method: "POST", body: JSON.stringify({
+    taskName: name,
+    taskDescription: desc,
+    startDate: start,
+    dueDate: due,
+    taskStatus: "Pending",
+    project: {
+      projectID : currentProjectId
+    },
+    assignedUsers: [{
+      userID: 1
+    }]
+  }),        
+  headers: new Headers({'content-type': 'application/json'}),
+})
+}
 
-        // Retrieve the list of projects using AJAX request
-        fetch('/api/projects/list')
-        .then(response => response.json())
-        .then(projects => {
-        // Loop through each project and create a new row in the HTML table
-        projects.forEach(project => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-          <td>
-            <div class="d-flex px-2">
-              <div>
-                <img src="assets/img/small-logos/devto.svg" class="avatar avatar-sm rounded-circle me-2" alt="xd">
-              </div>
-              <div class="my-auto">
-                <h6 class="mb-0 text-sm">${project.name}</h6>
-              </div>
-            </div>
-          </td>
-          <td>
-            <p class="text-sm font-weight-bold mb-0">$${project.budget}</p>
-          </td>
-          <td>
-            <span class="text-xs font-weight-bold">${project.status}</span>
-          </td>
-          <td class="align-middle text-center">
-            <div class="d-flex align-items-center justify-content-center">
-              <span class="me-2 text-xs font-weight-bold">${project.completion}%</span>
-              <div>
-                <div class="progress">
-                  <div class="progress-bar bg-gradient-success" role="progressbar" aria-valuenow="${project.completion}" aria-valuemin="0" aria-valuemax="100" style="width: ${project.completion}%;"></div>
-                </div>
-              </div>
-            </div>
-          </td>
-          <td class="align-middle">
-            <button type="button" class="btn btn-outline-primary">View Project</button>
-          </td>
-        `;
-            projectTableBody.appendChild(row);
-        });
-    })
-        .catch(error => console.error(error));
 
-    // GET /projects/{id}
-    $.ajax({
-        url: '/projects/1',
-        type: 'GET',
-        dataType: 'json',
-        success: function(response) {
-            $('#project').html(`<p>${response.name} - ${response.description}</p>`);
-        },
-        error: function(error) {
-            console.log(error);
-        }
-    });
+const renderProject = (project) => {
+  console.log(project);
+  const projectTitleElement = document.getElementById("projectName")
+  const projectDescription = document.getElementById("projectDescription")
+  const projectTaskListElement = document.getElementById("projectTaskList")
+  const deleteBtn = document.getElementById("deleteProjectBtn")
+  projectTitleElement.innerText = project.projectName
+  projectDescription.innerText = project.projectDescription
 
-    // POST /projects/add
-    $.ajax({
-        url: '/projects/add',
-        type: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify({
-            name: 'New Project',
-            description: 'This is a new project'
-        }),
-        success: function(response) {
-            $('#addProject').html(`<p>${response.name} - ${response.description} added successfully</p>`);
-        },
-        error: function(error) {
-            console.log(error);
-        }
-    });
+  for (let i = 0; i < project.tasks.length; i++) {
+    const task = project.tasks[i];
+    projectTaskListElement.append(createProjectTask(task))
+    
+  }
 
-    // PUT /projects/update
-    $.ajax({
-        url: '/projects/update',
-        type: 'PUT',
-        contentType: 'application/json',
-        data: JSON.stringify({
-            id: 1,
-            name: 'Updated Project',
-            description: 'This is an updated project'
-        }),
-        success: function(response) {
-            $('#updateProject').html(`<p>${response.name} - ${response.description} updated successfully</p>`);
-        },
-        error: function(error) {
-            console.log(error);
-        }
-    });
 
-    // DELETE /projects/delete/{id}
-    $.ajax({
-        url: '/projects/delete/1',
-        type: 'DELETE',
-        success: function(response) {
-            $('#deleteProject').html('<p>Project deleted successfully</p>');
-        },
-        error: function(error) {
-            console.log(error);
-        }
-    });
-});
+
+  deleteBtn.addEventListener("click", deleteProject)
+}
+
+const createProjectTask = (task) => {
+  const taskElement = document.createElement("li")
+  const startDate = document.createElement("p")
+  const dueDate = document.createElement("p")
+  const description = document.createElement("p")
+  const name = document.createElement("p")
+  const deleteBtn = document.createElement("button")
+  deleteBtn.classList.add("btn", "bg-gradient-primary")
+
+  //Set values
+  startDate.innerText = task.startDate
+  dueDate.innerText = task.dueDate
+  description.innerText = task.taskDescription
+  name.innerText = task.taskName
+  deleteBtn.innerText = "DELETE"
+  deleteBtn.addEventListener("click", () => deleteTask(task.taskID))
+  taskElement.dataset.id = task.taskID
+
+
+  taskElement.append(name, description,startDate, dueDate, deleteBtn)
+  return taskElement
+}
+
+
+window.onload = () => {
+  document.getElementById("addTaskForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    const name = document.getElementById("addName").value.trim()
+    const desc = document.getElementById("addDesc").value.trim()
+    const start = document.getElementById("addStart").value.trim()
+    const due = document.getElementById("addDue").value.trim()
+    
+    createTask(name,desc,start,due)
+  });
+
+  document.getElementById("editProjectForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    const name = document.getElementById("ediProjecttName").value.trim()
+    const desc = document.getElementById("ediProjecttDesc").value.trim()
+
+    
+    updateProject(name,desc)
+  });
+};
+
+getProject()
+
+
+
+
+
+
+
+
+
